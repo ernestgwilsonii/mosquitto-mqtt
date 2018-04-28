@@ -1,0 +1,53 @@
+version: '3.4'
+
+services:
+
+  mqtt:
+    # https://hub.docker.com/_/eclipse-mosquitto/
+    image: eclipse-mosquitto:1.4.12
+    hostname: mosquitto
+    ports:
+      # MQTT unencrypted TCP 1883
+      - mode: host
+        target: 1883
+        published: 1883
+        protocol: tcp
+      # MQTT encrypted TCP 8883
+      - mode: host
+        target: 8883
+        published: 8883
+        protocol: tcp
+      # Websocket unencrypted TCP 9001
+      - mode: host
+        target: 9001
+        published: 9001
+        protocol: tcp
+      # Websocket encrypted TCP 9883
+      - mode: host
+        target: 9883
+        published: 9883
+        protocol: tcp
+    networks:
+      - mqtt-net1
+    volumes:
+      - type: bind
+        source: /opt/mqtt/config
+        target: /mosquitto/config
+      - type: bind
+        source: /opt/mqtt/data
+        target: /mosquitto/data
+      - type: bind
+        source: /opt/mqtt/log
+        target: /mosquitto/log
+    deploy:
+      placement:
+        constraints:
+          - node.labels.swarm.node == 1
+      labels:
+        local.description: "Mosquitto MQTT"
+      restart_policy:
+        condition: on-failure
+
+networks:
+  mqtt-net1:
+
